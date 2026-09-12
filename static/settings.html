@@ -848,6 +848,136 @@
 
 
 
+            <div
+                style="
+                    margin-top: 28px;
+                    padding-top: 22px;
+                    border-top: 1px solid var(--line);
+                "
+            >
+
+                <label>
+                    Transport modes
+                </label>
+
+                <div
+                    style="
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        margin-top: 10px;
+                    "
+                >
+
+                    <label
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 10px 14px;
+                            border: 1px solid var(--line);
+                            border-radius: 8px;
+                            cursor: pointer;
+                        "
+                    >
+                        <input
+                            class="transport-mode"
+                            type="checkbox"
+                            value="BUS"
+                            style="width: auto; margin: 0;"
+                        >
+                        🚌 Bus
+                    </label>
+
+                    <label
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 10px 14px;
+                            border: 1px solid var(--line);
+                            border-radius: 8px;
+                            cursor: pointer;
+                        "
+                    >
+                        <input
+                            class="transport-mode"
+                            type="checkbox"
+                            value="RAIL"
+                            style="width: auto; margin: 0;"
+                        >
+                        🚆 Train
+                    </label>
+
+                    <label
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 10px 14px;
+                            border: 1px solid var(--line);
+                            border-radius: 8px;
+                            cursor: pointer;
+                        "
+                    >
+                        <input
+                            class="transport-mode"
+                            type="checkbox"
+                            value="TRAM"
+                            style="width: auto; margin: 0;"
+                        >
+                        🚋 Tram
+                    </label>
+
+                    <label
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 10px 14px;
+                            border: 1px solid var(--line);
+                            border-radius: 8px;
+                            cursor: pointer;
+                        "
+                    >
+                        <input
+                            class="transport-mode"
+                            type="checkbox"
+                            value="SUBWAY"
+                            style="width: auto; margin: 0;"
+                        >
+                        🚇 Metro
+                    </label>
+
+                    <label
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 10px 14px;
+                            border: 1px solid var(--line);
+                            border-radius: 8px;
+                            cursor: pointer;
+                        "
+                    >
+                        <input
+                            class="transport-mode"
+                            type="checkbox"
+                            value="FERRY"
+                            style="width: auto; margin: 0;"
+                        >
+                        ⛴️ Ferry
+                    </label>
+
+                </div>
+
+                <div class="help">
+                    Only selected HSL transport modes will be discovered and shown.
+                </div>
+
+            </div>
+
+
             <div class="button-row">
 
 
@@ -1110,6 +1240,32 @@ async function loadSettings() {
 
     marginInput.value =
         location.safety_margin_minutes;
+
+
+    const enabledTransportModes =
+        new Set(
+            location.transport_modes || [
+                "BUS",
+                "RAIL",
+                "TRAM",
+                "SUBWAY",
+                "FERRY",
+            ]
+        );
+
+
+    document.querySelectorAll(
+        ".transport-mode"
+    ).forEach(
+        input => {
+
+            input.checked =
+                enabledTransportModes.has(
+                    input.value
+                );
+
+        }
+    );
 
 
     includeInput.value =
@@ -1419,56 +1575,29 @@ async function saveLocation() {
         safety_margin_minutes:
             Number(
                 marginInput.value
+            ),
+
+        transport_modes:
+            Array.from(
+                document.querySelectorAll(
+                    ".transport-mode:checked"
+                )
+            ).map(
+                input =>
+                    input.value
             )
 
     };
 
 
-    const response =
-        await fetch(
-
-            "/api/settings/location",
-
-            {
-
-                method:
-                    "POST",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json"
-
-                },
-
-                body:
-                    JSON.stringify(
-                        payload
-                    )
-
-            }
-
-        );
-
-
-    const result =
-        await response.json();
-
-
-    const message =
-        document.getElementById(
-            "locationMessage"
-        );
-
-
-    if (!response.ok) {
+    if (
+        payload.transport_modes.length === 0
+    ) {
 
         showMessage(
-            message,
+            locationMessage,
             "error",
-            JSON.stringify(
-                result.detail
-            )
+            "Select at least one transport mode."
         );
 
         return;
@@ -1476,17 +1605,74 @@ async function saveLocation() {
     }
 
 
-    showMessage(
-        message,
-        "success",
-        "Location settings saved. Stop discovery and walking calculations were refreshed."
-    );
+    try {
 
 
-    await loadSettings();
+        const response =
+            await fetch(
+
+                "/api/settings/location",
+
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+
+                }
+
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                JSON.stringify(
+                    result.detail
+                )
+            );
+
+        }
+
+
+        showMessage(
+            locationMessage,
+            "success",
+            "Location settings saved successfully."
+        );
+
+
+        await loadSettings();
+
+
+    } catch (error) {
+
+
+        showMessage(
+            locationMessage,
+            "error",
+            `Failed to save settings: ${error.message}`
+        );
+
+
+    }
 
 }
-
 
 
 async function saveStops() {

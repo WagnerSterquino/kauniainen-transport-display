@@ -70,6 +70,51 @@ HOME_LON = 0.0
 SEARCH_RADIUS_METERS = 500
 SAFETY_MARGIN_MINUTES = 1.0
 
+SUPPORTED_TRANSPORT_MODES = [
+    "BUS",
+    "RAIL",
+    "TRAM",
+    "SUBWAY",
+    "FERRY",
+]
+
+DEFAULT_TRANSPORT_MODES = SUPPORTED_TRANSPORT_MODES.copy()
+
+TRANSPORT_MODES = DEFAULT_TRANSPORT_MODES.copy()
+
+MODE_META = {
+    "BUS": {
+        "type": "BUS",
+        "emoji": "🚌",
+        "label": "Bus",
+        "priority": 4,
+    },
+    "RAIL": {
+        "type": "TRAIN",
+        "emoji": "🚆",
+        "label": "Train",
+        "priority": 0,
+    },
+    "TRAM": {
+        "type": "TRAM",
+        "emoji": "🚋",
+        "label": "Tram",
+        "priority": 2,
+    },
+    "SUBWAY": {
+        "type": "METRO",
+        "emoji": "🚇",
+        "label": "Metro",
+        "priority": 1,
+    },
+    "FERRY": {
+        "type": "FERRY",
+        "emoji": "⛴️",
+        "label": "Ferry",
+        "priority": 3,
+    },
+}
+
 
 STOP_OVERRIDES = {
     "include": [],
@@ -93,6 +138,7 @@ def load_runtime_config():
     global HOME_LON
     global SEARCH_RADIUS_METERS
     global SAFETY_MARGIN_MINUTES
+    global TRANSPORT_MODES
     global STOP_OVERRIDES
 
     global walking_cache
@@ -141,6 +187,23 @@ def load_runtime_config():
             1,
         )
     )
+
+    configured_modes = (
+        reference.get(
+            "transport_modes",
+            DEFAULT_TRANSPORT_MODES,
+        )
+        or DEFAULT_TRANSPORT_MODES
+    )
+
+    TRANSPORT_MODES = [
+        mode
+        for mode in configured_modes
+        if mode in SUPPORTED_TRANSPORT_MODES
+    ]
+
+    if not TRANSPORT_MODES:
+        TRANSPORT_MODES = DEFAULT_TRANSPORT_MODES.copy()
 
 
     STOP_OVERRIDES = {
@@ -238,6 +301,11 @@ class LocationSettings(BaseModel):
     safety_margin_minutes: float = Field(
         ge=0,
         le=10,
+    )
+
+    transport_modes: list[str] = Field(
+        default_factory=lambda: DEFAULT_TRANSPORT_MODES.copy(),
+        min_length=1,
     )
 
 
@@ -420,7 +488,7 @@ query WalkingRoute(
 
 app = FastAPI(
     title="Kauniainen Public Transport Display",
-    version="0.7.0",
+    version="0.8.0",
 )
 
 
@@ -532,7 +600,6 @@ def analyze_stop(
     lines = set()
     destinations = set()
 
-
     for item in (
         stop.get(
             "stoptimesWithoutPatterns",
@@ -552,74 +619,72 @@ def analyze_stop(
             )
         )
 
-
         mode = route.get(
             "mode"
         )
 
+        if (
+            not mode
+            or mode not in TRANSPORT_MODES
+        ):
+            continue
+
+        modes.add(mode)
 
         line = route.get(
             "shortName"
         )
 
-
         destination = item.get(
             "headsign"
         )
 
-
-        if mode:
-            modes.add(mode)
-
-
         if line:
             lines.add(line)
-
 
         if destination:
             destinations.add(
                 destination
             )
 
-
-    useful_modes = modes.intersection(
-        {
-            "BUS",
-            "RAIL",
-        }
-    )
-
-
-    if not useful_modes:
+    if not modes:
         return None
 
-
-    mode = (
-        "RAIL"
-        if "RAIL" in useful_modes
-        else "BUS"
+    mode = min(
+        modes,
+        key=lambda item:
+            MODE_META.get(
+                item,
+                {},
+            ).get(
+                "priority",
+                99,
+            ),
     )
-
 
     stop_id = stop["gtfsId"]
 
-    code = stop.get(
-        "code"
-    ) or "-"
+    code = (
+        stop.get(
+            "code"
+        )
+        or "-"
+    )
 
     name = stop["name"]
 
-    platform = stop.get(
-        "platformCode"
-    ) or "-"
-
+    platform = (
+        stop.get(
+            "platformCode"
+        )
+        or "-"
+    )
 
     direction = simplify_direction(
         sorted(
             destinations
         )
     )
-
 
     custom_label = (
         STOP_OVERRIDES[
@@ -629,37 +694,39 @@ def analyze_stop(
         )
     )
 
+    meta = MODE_META[mode]
 
     if custom_label:
 
         label = custom_label
 
-
-    elif mode == "RAIL":
-
-        label = (
-            f"🚆 {name}"
-            f" · Platform {platform}"
-        )
-
-        if direction:
-            label += (
-                f" → {direction}"
-            )
-
-
     else:
 
         label = (
-            f"🚌 {name}"
-            f" · {code}"
+            f"{meta['emoji']} {name}"
         )
+
+        if mode in {
+            "RAIL",
+            "SUBWAY",
+        }:
+
+            if platform != "-":
+                label += (
+                    f" · Platform {platform}"
+                )
+
+        else:
+
+            if code != "-":
+                label += (
+                    f" · {code}"
+                )
 
         if direction:
             label += (
                 f" → {direction}"
             )
-
 
     return {
 
@@ -676,11 +743,7 @@ def analyze_stop(
             label,
 
         "type":
-            (
-                "TRAIN"
-                if mode == "RAIL"
-                else "BUS"
-            ),
+            meta["type"],
 
         "mode":
             mode,
@@ -707,7 +770,6 @@ def analyze_stop(
         "directions":
             sorted(destinations),
     }
-
 
 def get_single_stop_info(
     stop_id,
@@ -850,13 +912,18 @@ def discover_nearby_stops():
     )
 
 
-    # Trains first, then distance.
+    # Sort by transport mode priority,
+    # then walking distance.
     result.sort(
         key=lambda stop: (
 
-            0
-            if stop["type"] == "TRAIN"
-            else 1,
+            MODE_META.get(
+                stop["mode"],
+                {},
+            ).get(
+                "priority",
+                99,
+            ),
 
             (
                 stop[
@@ -1150,6 +1217,9 @@ def get_app_config():
 
             "safety_margin_minutes":
                 SAFETY_MARGIN_MINUTES,
+
+            "transport_modes":
+                TRANSPORT_MODES,
         }
 
     }
@@ -1196,6 +1266,9 @@ def get_settings():
 
             "safety_margin_minutes":
                 SAFETY_MARGIN_MINUTES,
+
+            "transport_modes":
+                TRANSPORT_MODES,
         },
 
 
@@ -1243,6 +1316,13 @@ def save_location_settings(
 
             "safety_margin_minutes":
                 settings.safety_margin_minutes,
+
+            "transport_modes":
+                [
+                    mode
+                    for mode in settings.transport_modes
+                    if mode in SUPPORTED_TRANSPORT_MODES
+                ],
         }
 
     }
@@ -1561,6 +1641,15 @@ def get_departures(
                 "route"
             ]
         )
+
+        route_mode = (
+            route.get(
+                "mode"
+            )
+        )
+
+        if route_mode not in TRANSPORT_MODES:
+            continue
 
 
         status = calculate_status(
