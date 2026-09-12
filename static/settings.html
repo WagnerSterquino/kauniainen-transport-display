@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Transport Display Settings
+    </title>
+
+
+    <style>
+
+        :root {
+
+            --hsl-blue:
+                #007AC9;
+
+            --background:
+                #F5F7F8;
+
+            --panel:
+                #FFFFFF;
+
+            --text:
+                #1F2A30;
+
+            --muted:
+                #667680;
+
+            --line:
+                #D7E0E5;
+
+            --success:
+                #239B56;
+
+            --error:
+                #C0392B;
+
+        }
+
+
+        * {
+            box-sizing:
+                border-box;
+        }
+
+
+        body {
+
+            margin:
+                0;
+
+            background:
+                var(--background);
+
+            color:
+                var(--text);
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+        }
+
+
+        header {
+
+            background:
+                var(--hsl-blue);
+
+            color:
+                white;
+
+            padding:
+                20px 4%;
+
+        }
+
+
+        header h1 {
+
+            margin:
+                0;
+
+            font-size:
+                28px;
+
+        }
+
+
+        header p {
+
+            margin:
+                5px 0 0;
+
+            opacity:
+                0.9;
+
+        }
+
+
+        main {
+
+            width:
+                92%;
+
+            max-width:
+                1050px;
+
+            margin:
+                30px auto 50px;
+
+        }
+
+
+        .summary {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    3,
+                    1fr
+                );
+
+            gap:
+                15px;
+
+            margin-bottom:
+                25px;
+
+        }
+
+
+        .summary-box {
+
+            background:
+                white;
+
+            border:
+                1px solid var(--line);
+
+            border-radius:
+                8px;
+
+            padding:
+                18px;
+
+        }
+
+
+        .summary-label {
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
+        }
+
+
+        .summary-value {
+
+            margin-top:
+                5px;
+
+            color:
+                var(--hsl-blue);
+
+            font-size:
+                24px;
+
+            font-weight:
+                bold;
+
+        }
+
+
+        .card {
+
+            background:
+                var(--panel);
+
+            border:
+                1px solid var(--line);
+
+            border-radius:
+                10px;
+
+            margin-bottom:
+                25px;
+
+            overflow:
+                hidden;
+
+        }
+
+
+        .card-title {
+
+            background:
+                var(--hsl-blue);
+
+            color:
+                white;
+
+            padding:
+                14px 18px;
+
+            font-weight:
+                bold;
+
+        }
+
+
+        .card-body {
+
+            padding:
+                20px;
+
+        }
+
+
+        .form-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    2,
+                    1fr
+                );
+
+            gap:
+                18px;
+
+        }
+
+
+        .full-width {
+
+            grid-column:
+                1 / -1;
+
+        }
+
+
+        label {
+
+            display:
+                block;
+
+            margin-bottom:
+                6px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
+        }
+
+
+        input,
+        textarea {
+
+            width:
+                100%;
+
+            padding:
+                11px;
+
+            border:
+                1px solid #BFCBD2;
+
+            border-radius:
+                5px;
+
+            font-size:
+                16px;
+
+            background:
+                white;
+
+            color:
+                var(--text);
+
+        }
+
+
+        input:focus,
+        textarea:focus {
+
+            outline:
+                3px solid rgba(
+                    0,
+                    122,
+                    201,
+                    0.18
+                );
+
+            border-color:
+                var(--hsl-blue);
+
+        }
+
+
+        textarea {
+
+            min-height:
+                120px;
+
+            resize:
+                vertical;
+
+            font-family:
+                monospace;
+
+        }
+
+
+        .help {
+
+            margin-top:
+                5px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                12px;
+
+        }
+
+
+        .address-search-row {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                1fr auto;
+
+            gap:
+                10px;
+
+        }
+
+
+        .address-search-row button {
+
+            min-width:
+                150px;
+
+        }
+
+
+        .address-results {
+
+            margin-top:
+                12px;
+
+        }
+
+
+        .address-result {
+
+            padding:
+                12px;
+
+            margin-bottom:
+                8px;
+
+            background:
+                white;
+
+            border:
+                1px solid var(--line);
+
+            border-radius:
+                6px;
+
+            cursor:
+                pointer;
+
+        }
+
+
+        .address-result:hover {
+
+            border-color:
+                var(--hsl-blue);
+
+            background:
+                #F2FAFE;
+
+        }
+
+
+        .address-result-title {
+
+            font-size:
+                14px;
+
+        }
+
+
+        .address-result-coordinates {
+
+            margin-top:
+                5px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                12px;
+
+        }
+
+
+        .selected-address {
+
+            padding:
+                12px;
+
+            background:
+                #EAF7EF;
+
+            border:
+                1px solid #B9E2C8;
+
+            border-radius:
+                6px;
+
+            color:
+                #176B38;
+
+        }
+
+
+        .button-row {
+
+            margin-top:
+                20px;
+
+            display:
+                flex;
+
+            gap:
+                10px;
+
+            flex-wrap:
+                wrap;
+
+        }
+
+
+        button,
+        .link-button {
+
+            display:
+                inline-block;
+
+            border:
+                1px solid var(--hsl-blue);
+
+            border-radius:
+                5px;
+
+            padding:
+                10px 18px;
+
+            background:
+                var(--hsl-blue);
+
+            color:
+                white;
+
+            font-size:
+                14px;
+
+            cursor:
+                pointer;
+
+            text-decoration:
+                none;
+
+        }
+
+
+        button:disabled {
+
+            opacity:
+                0.55;
+
+            cursor:
+                not-allowed;
+
+        }
+
+
+        .secondary {
+
+            background:
+                white;
+
+            color:
+                var(--hsl-blue);
+
+        }
+
+
+        .message {
+
+            display:
+                none;
+
+            margin-top:
+                15px;
+
+            padding:
+                11px;
+
+            border-radius:
+                5px;
+
+        }
+
+
+        .message.success {
+
+            display:
+                block;
+
+            background:
+                #EAF7EF;
+
+            color:
+                var(--success);
+
+        }
+
+
+        .message.error {
+
+            display:
+                block;
+
+            background:
+                #FDEDEC;
+
+            color:
+                var(--error);
+
+        }
+
+
+        @media (
+            max-width: 700px
+        ) {
+
+            .summary {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .form-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .full-width {
+
+                grid-column:
+                    auto;
+
+            }
+
+
+            .address-search-row {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .address-search-row button {
+
+                width:
+                    100%;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <h1>
+        Transport Display Settings
+    </h1>
+
+    <p>
+        Reference location, walking calculation and nearby transport points
+    </p>
+
+</header>
+
+
+<main>
+
+
+    <div class="summary">
+
+
+        <div class="summary-box">
+
+            <div class="summary-label">
+                Reference
+            </div>
+
+            <div
+                id="summaryReference"
+                class="summary-value"
+            >
+                --
+            </div>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <div class="summary-label">
+                Search radius
+            </div>
+
+            <div
+                id="summaryRadius"
+                class="summary-value"
+            >
+                --
+            </div>
+
+        </div>
+
+
+        <div class="summary-box">
+
+            <div class="summary-label">
+                Transport points
+            </div>
+
+            <div
+                id="summaryStops"
+                class="summary-value"
+            >
+                --
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <section class="card">
+
+
+        <div class="card-title">
+            Reference location
+        </div>
+
+
+        <div class="card-body">
+
+
+            <div class="form-grid">
+
+
+                <div class="full-width">
+
+                    <label for="address">
+                        Address search
+                    </label>
+
+
+                    <div class="address-search-row">
+
+                        <input
+                            id="address"
+                            type="text"
+                            placeholder="Example: Mannerheimintie 1, Helsinki"
+                        >
+
+
+                        <button
+                            id="findAddress"
+                            type="button"
+                        >
+                            Find location
+                        </button>
+
+                    </div>
+
+
+                    <div class="help">
+                        Search is currently limited to addresses in Finland.
+                        Select the correct result to automatically fill latitude and longitude.
+                    </div>
+
+
+                    <div
+                        id="addressResults"
+                        class="address-results"
+                    ></div>
+
+                </div>
+
+
+
+                <div>
+
+                    <label for="name">
+                        Reference name
+                    </label>
+
+                    <input
+                        id="name"
+                        type="text"
+                    >
+
+                    <div class="help">
+                        Example: Home. This name is shown in the map popup.
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <label for="radius">
+                        Search radius (m)
+                    </label>
+
+                    <input
+                        id="radius"
+                        type="number"
+                        min="50"
+                        max="2000"
+                    >
+
+                    <div class="help">
+                        Nearby bus stops and train platforms are discovered automatically.
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <label for="latitude">
+                        Latitude
+                    </label>
+
+                    <input
+                        id="latitude"
+                        type="number"
+                        step="0.000001"
+                        min="-90"
+                        max="90"
+                    >
+
+                </div>
+
+
+
+                <div>
+
+                    <label for="longitude">
+                        Longitude
+                    </label>
+
+                    <input
+                        id="longitude"
+                        type="number"
+                        step="0.000001"
+                        min="-180"
+                        max="180"
+                    >
+
+                </div>
+
+
+
+                <div>
+
+                    <label for="margin">
+                        Safety margin (minutes)
+                    </label>
+
+                    <input
+                        id="margin"
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        max="10"
+                    >
+
+                    <div class="help">
+                        Used for ✅ / ⚠️ / ❌ walking-time status.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="button-row">
+
+
+                <button
+                    id="saveLocation"
+                    type="button"
+                >
+                    Save location settings
+                </button>
+
+
+                <a
+                    href="/"
+                    class="link-button secondary"
+                >
+                    Back to display
+                </a>
+
+
+            </div>
+
+
+
+            <div
+                id="locationMessage"
+                class="message"
+            ></div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <section class="card">
+
+
+        <div class="card-title">
+            Stop overrides
+        </div>
+
+
+        <div class="card-body">
+
+
+            <div class="form-grid">
+
+
+                <div>
+
+                    <label for="include">
+                        Always include
+                    </label>
+
+                    <textarea
+                        id="include"
+                        placeholder="One GTFS ID per line"
+                    ></textarea>
+
+                    <div class="help">
+                        These stops remain available even when they are outside the configured radius.
+                    </div>
+
+                </div>
+
+
+
+                <div>
+
+                    <label for="exclude">
+                        Exclude
+                    </label>
+
+                    <textarea
+                        id="exclude"
+                        placeholder="One GTFS ID per line"
+                    ></textarea>
+
+                    <div class="help">
+                        These stops will not appear in the display even when they are inside the configured radius.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="button-row">
+
+                <button
+                    id="saveStops"
+                    type="button"
+                >
+                    Save stop overrides
+                </button>
+
+            </div>
+
+
+
+            <div
+                id="stopMessage"
+                class="message"
+            ></div>
+
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+<script>
+
+
+const nameInput =
+    document.getElementById(
+        "name"
+    );
+
+
+const latitudeInput =
+    document.getElementById(
+        "latitude"
+    );
+
+
+const longitudeInput =
+    document.getElementById(
+        "longitude"
+    );
+
+
+const radiusInput =
+    document.getElementById(
+        "radius"
+    );
+
+
+const marginInput =
+    document.getElementById(
+        "margin"
+    );
+
+
+const includeInput =
+    document.getElementById(
+        "include"
+    );
+
+
+const excludeInput =
+    document.getElementById(
+        "exclude"
+    );
+
+
+const addressInput =
+    document.getElementById(
+        "address"
+    );
+
+
+const addressResults =
+    document.getElementById(
+        "addressResults"
+    );
+
+
+const findAddressButton =
+    document.getElementById(
+        "findAddress"
+    );
+
+
+
+function parseLines(
+    value
+) {
+
+    return value
+        .split("\n")
+        .map(
+            item =>
+                item.trim()
+        )
+        .filter(
+            item =>
+                item.length > 0
+        );
+
+}
+
+
+
+function showMessage(
+    element,
+    type,
+    text
+) {
+
+    element.className =
+        `message ${type}`;
+
+
+    element.textContent =
+        text;
+
+}
+
+
+
+async function loadSettings() {
+
+
+    const response =
+        await fetch(
+            "/api/settings"
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            `HTTP ${response.status}`
+        );
+
+    }
+
+
+    const data =
+        await response.json();
+
+
+    const location =
+        data.location;
+
+
+    nameInput.value =
+        location.name;
+
+
+    latitudeInput.value =
+        location.latitude;
+
+
+    longitudeInput.value =
+        location.longitude;
+
+
+    radiusInput.value =
+        location.search_radius_m;
+
+
+    marginInput.value =
+        location.safety_margin_minutes;
+
+
+    includeInput.value =
+        data.stops.include.join(
+            "\n"
+        );
+
+
+    excludeInput.value =
+        data.stops.exclude.join(
+            "\n"
+        );
+
+
+    document.getElementById(
+        "summaryReference"
+    ).textContent =
+        location.name;
+
+
+    document.getElementById(
+        "summaryRadius"
+    ).textContent =
+        `${location.search_radius_m} m`;
+
+
+    document.getElementById(
+        "summaryStops"
+    ).textContent =
+        data.discovered_stop_count;
+
+}
+
+
+
+async function findAddress() {
+
+
+    const address =
+        addressInput.value.trim();
+
+
+    if (!address) {
+
+        addressResults.innerHTML = `
+
+            <div class="selected-address">
+                Please enter an address.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    findAddressButton.disabled =
+        true;
+
+
+    findAddressButton.textContent =
+        "Searching...";
+
+
+    addressResults.innerHTML = `
+
+        <div class="help">
+            Searching for location...
+        </div>
+
+    `;
+
+
+    try {
+
+
+        const response =
+            await fetch(
+
+                "/api/geocode",
+
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            {
+                                address:
+                                    address
+                            }
+                        )
+
+                }
+
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                JSON.stringify(
+                    result.detail
+                )
+            );
+
+        }
+
+
+        if (
+            result.length === 0
+        ) {
+
+            addressResults.innerHTML = `
+
+                <div class="selected-address">
+                    No matching address was found.
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        addressResults.innerHTML =
+            "";
+
+
+        result.forEach(
+            (
+                location,
+                index
+            ) => {
+
+
+                const element =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                element.className =
+                    "address-result";
+
+
+                element.innerHTML = `
+
+                    <div class="address-result-title">
+
+                        <strong>
+                            ${index + 1}.
+                        </strong>
+
+                        ${location.display_name}
+
+                    </div>
+
+
+                    <div class="address-result-coordinates">
+
+                        ${location.latitude.toFixed(6)},
+                        ${location.longitude.toFixed(6)}
+
+                    </div>
+
+                `;
+
+
+                element.addEventListener(
+
+                    "click",
+
+                    () => {
+
+
+                        latitudeInput.value =
+                            location.latitude.toFixed(
+                                6
+                            );
+
+
+                        longitudeInput.value =
+                            location.longitude.toFixed(
+                                6
+                            );
+
+
+                        addressResults.innerHTML = `
+
+                            <div class="selected-address">
+
+                                ✅ Location selected
+
+                                <br><br>
+
+                                <strong>
+                                    ${location.display_name}
+                                </strong>
+
+                                <br>
+
+                                ${location.latitude.toFixed(6)},
+                                ${location.longitude.toFixed(6)}
+
+                                <br><br>
+
+                                Press
+                                <strong>
+                                    Save location settings
+                                </strong>
+                                to apply the new reference.
+
+                            </div>
+
+                        `;
+
+                    }
+
+                );
+
+
+                addressResults.appendChild(
+                    element
+                );
+
+            }
+
+        );
+
+
+    }
+
+    catch (error) {
+
+
+        addressResults.innerHTML = `
+
+            <div class="selected-address">
+
+                Address search failed:
+
+                <br>
+
+                ${error.message}
+
+            </div>
+
+        `;
+
+
+    }
+
+    finally {
+
+
+        findAddressButton.disabled =
+            false;
+
+
+        findAddressButton.textContent =
+            "Find location";
+
+    }
+
+}
+
+
+
+async function saveLocation() {
+
+
+    const payload = {
+
+        name:
+            nameInput.value.trim(),
+
+        latitude:
+            Number(
+                latitudeInput.value
+            ),
+
+        longitude:
+            Number(
+                longitudeInput.value
+            ),
+
+        search_radius_m:
+            Number(
+                radiusInput.value
+            ),
+
+        safety_margin_minutes:
+            Number(
+                marginInput.value
+            )
+
+    };
+
+
+    const response =
+        await fetch(
+
+            "/api/settings/location",
+
+            {
+
+                method:
+                    "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body:
+                    JSON.stringify(
+                        payload
+                    )
+
+            }
+
+        );
+
+
+    const result =
+        await response.json();
+
+
+    const message =
+        document.getElementById(
+            "locationMessage"
+        );
+
+
+    if (!response.ok) {
+
+        showMessage(
+            message,
+            "error",
+            JSON.stringify(
+                result.detail
+            )
+        );
+
+        return;
+
+    }
+
+
+    showMessage(
+        message,
+        "success",
+        "Location settings saved. Stop discovery and walking calculations were refreshed."
+    );
+
+
+    await loadSettings();
+
+}
+
+
+
+async function saveStops() {
+
+
+    const payload = {
+
+        include:
+            parseLines(
+                includeInput.value
+            ),
+
+        exclude:
+            parseLines(
+                excludeInput.value
+            )
+
+    };
+
+
+    const response =
+        await fetch(
+
+            "/api/settings/stops",
+
+            {
+
+                method:
+                    "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body:
+                    JSON.stringify(
+                        payload
+                    )
+
+            }
+
+        );
+
+
+    const result =
+        await response.json();
+
+
+    const message =
+        document.getElementById(
+            "stopMessage"
+        );
+
+
+    if (!response.ok) {
+
+        showMessage(
+            message,
+            "error",
+            JSON.stringify(
+                result.detail
+            )
+        );
+
+        return;
+
+    }
+
+
+    showMessage(
+        message,
+        "success",
+        "Stop overrides saved successfully."
+    );
+
+
+    await loadSettings();
+
+}
+
+
+
+findAddressButton.addEventListener(
+    "click",
+    findAddress
+);
+
+
+
+addressInput.addEventListener(
+
+    "keydown",
+
+    event => {
+
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+            findAddress();
+
+        }
+
+    }
+
+);
+
+
+
+document
+    .getElementById(
+        "saveLocation"
+    )
+    .addEventListener(
+        "click",
+        saveLocation
+    );
+
+
+
+document
+    .getElementById(
+        "saveStops"
+    )
+    .addEventListener(
+        "click",
+        saveStops
+    );
+
+
+
+loadSettings()
+    .catch(
+        error => {
+
+            console.error(
+                "Unable to load settings:",
+                error
+            );
+
+        }
+    );
+
+
+</script>
+
+
+</body>
+
+</html>

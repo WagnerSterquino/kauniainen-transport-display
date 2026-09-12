@@ -1,0 +1,6 @@
+reference:
+  name: "Example Location"
+  latitude: 60.169900
+  longitude: 24.938400
+  search_radius_m: 500
+  safety_margin_minutes: 1

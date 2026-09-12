@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Kauniainen Public Transport
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+
+    <style>
+
+        :root {
+
+            --hsl-blue: #007AC9;
+            --background: #F5F7F8;
+            --panel: #FFFFFF;
+
+            --text: #1F2A30;
+            --muted: #667680;
+            --line: #D7E0E5;
+
+            --live: #22A447;
+            --offline: #D64545;
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            background:
+                var(--background);
+
+            color:
+                var(--text);
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+
+        .header {
+
+            background:
+                var(--hsl-blue);
+
+            color:
+                white;
+
+            padding:
+                20px 3%;
+        }
+
+
+        .header-row {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                20px;
+        }
+
+
+        .header-title {
+
+            font-size:
+                31px;
+
+            font-weight:
+                700;
+        }
+
+
+        .header-subtitle {
+
+            margin-top:
+                4px;
+
+            opacity:
+                0.9;
+        }
+
+
+        .clock {
+
+            text-align:
+                right;
+
+            white-space:
+                nowrap;
+        }
+
+
+        .clock-time {
+
+            font-size:
+                30px;
+
+            font-weight:
+                700;
+        }
+
+
+        .clock-date {
+
+            margin-top:
+                3px;
+
+            font-size:
+                13px;
+
+            opacity:
+                0.9;
+        }
+
+
+        .container {
+
+            width:
+                95%;
+
+            max-width:
+                1500px;
+
+            margin:
+                0 auto;
+
+            padding:
+                24px 0;
+        }
+
+
+        .dashboard {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                360px 1fr;
+
+            gap:
+                24px;
+
+            align-items:
+                start;
+        }
+
+
+        .points-panel {
+
+            background:
+                white;
+
+            border:
+                1px solid var(--line);
+
+            border-radius:
+                10px;
+
+            overflow:
+                hidden;
+        }
+
+
+        .panel-title {
+
+            background:
+                var(--hsl-blue);
+
+            color:
+                white;
+
+            padding:
+                14px 17px;
+
+            font-weight:
+                700;
+        }
+
+
+        .panel-info {
+
+            padding:
+                11px 17px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
+            border-bottom:
+                1px solid var(--line);
+        }
+
+
+        .point-item {
+
+            display:
+                flex;
+
+            align-items:
+                flex-start;
+
+            gap:
+                10px;
+
+            padding:
+                11px 14px;
+
+            border-bottom:
+                1px solid #EDF1F3;
+        }
+
+
+        .point-item input {
+
+            width:
+                18px;
+
+            height:
+                18px;
+
+            margin-top:
+                3px;
+
+            cursor:
+                pointer;
+        }
+
+
+        .point-label {
+
+            cursor:
+                pointer;
+
+            font-size:
+                14px;
+
+            line-height:
+                1.35;
+        }
+
+
+        .point-number {
+
+            color:
+                var(--hsl-blue);
+
+            font-weight:
+                700;
+
+            margin-right:
+                5px;
+        }
+
+
+        .walking-info {
+
+            display:
+                block;
+
+            margin-top:
+                5px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                12px;
+        }
+
+
+        .point-actions {
+
+            display:
+                flex;
+
+            gap:
+                8px;
+
+            padding:
+                12px 14px;
+        }
+
+
+        .point-actions button {
+
+            flex:
+                1;
+
+            padding:
+                8px;
+
+            border:
+                1px solid var(--hsl-blue);
+
+            border-radius:
+                5px;
+
+            background:
+                white;
+
+            color:
+                var(--hsl-blue);
+
+            cursor:
+                pointer;
+        }
+
+
+        .section-title {
+
+            color:
+                var(--hsl-blue);
+
+            font-size:
+                25px;
+
+            font-weight:
+                700;
+
+            margin:
+                0 0 13px;
+        }
+
+
+        .departures {
+
+            background:
+                white;
+
+            border:
+                1px solid var(--line);
+
+            border-radius:
+                10px;
+
+            overflow:
+                hidden;
+        }
+
+
+        table {
+
+            width:
+                100%;
+
+            border-collapse:
+                collapse;
+        }
+
+
+        th {
+
+            background:
+                var(--hsl-blue);
+
+            color:
+                white;
+
+            text-align:
+                left;
+
+            padding:
+                12px 10px;
+
+            font-size:
+                13px;
+        }
+
+
+        td {
+
+            padding:
+                14px 10px;
+
+            border-bottom:
+                1px solid var(--line);
+
+            font-size:
+                17px;
+        }
+
+
+        .point-column {
+
+            width:
+                65px;
+
+            text-align:
+                center;
+        }
+
+
+        .point-badge {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            width:
+                30px;
+
+            height:
+                30px;
+
+            border-radius:
+                50%;
+
+            background:
+                var(--hsl-blue);
+
+            color:
+                white;
+
+            font-weight:
+                700;
+        }
+
+
+        .line-column {
+
+            width:
+                80px;
+
+            color:
+                var(--hsl-blue);
+
+            font-size:
+                21px;
+
+            font-weight:
+                700;
+        }
+
+
+        .time-column {
+
+            width:
+                90px;
+
+            font-weight:
+                600;
+        }
+
+
+        .minutes-column {
+
+            width:
+                95px;
+
+            color:
+                var(--hsl-blue);
+
+            font-weight:
+                700;
+        }
+
+
+        .walk-column {
+
+            width:
+                80px;
+
+            text-align:
+                center;
+
+            font-weight:
+                600;
+        }
+
+
+        .status-column {
+
+            width:
+                65px;
+
+            text-align:
+                center;
+
+            font-size:
+                22px;
+        }
+
+
+        .map-section {
+
+            margin-top:
+                24px;
+        }
+
+
+        #map {
+
+            width:
+                100%;
+
+            height:
+                390px;
+
+            border:
+                1px solid var(--line);
+
+            border-radius:
+                10px;
+        }
+
+
+        .number-marker {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            width:
+                30px;
+
+            height:
+                30px;
+
+            border-radius:
+                50%;
+
+            background:
+                #007AC9;
+
+            color:
+                white;
+
+            border:
+                3px solid white;
+
+            font-weight:
+                700;
+
+            box-shadow:
+                0 1px 5px rgba(0,0,0,0.4);
+        }
+
+
+        .home-marker {
+
+            font-size:
+                30px;
+
+            line-height:
+                30px;
+        }
+
+
+        .status-bar {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            flex-wrap:
+                wrap;
+
+            gap:
+                10px;
+
+            margin-top:
+                12px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+        }
+
+
+        .connection-status {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            gap:
+                7px;
+
+            font-weight:
+                700;
+        }
+
+
+        .connection-dot {
+
+            width:
+                10px;
+
+            height:
+                10px;
+
+            border-radius:
+                50%;
+
+            background:
+                var(--muted);
+        }
+
+
+        .connection-status.live {
+
+            color:
+                var(--live);
+        }
+
+
+        .connection-status.live
+        .connection-dot {
+
+            background:
+                var(--live);
+        }
+
+
+        .connection-status.offline {
+
+            color:
+                var(--offline);
+        }
+
+
+        .connection-status.offline
+        .connection-dot {
+
+            background:
+                var(--offline);
+        }
+
+
+        .error {
+
+            margin:
+                10px 0;
+
+            color:
+                #B00020;
+        }
+
+
+        @media (
+            max-width: 950px
+        ) {
+
+            .dashboard {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+
+        @media (
+            max-width: 650px
+        ) {
+
+            .header-row {
+
+                align-items:
+                    flex-start;
+            }
+
+
+            .header-title {
+
+                font-size:
+                    23px;
+            }
+
+
+            .clock-time {
+
+                font-size:
+                    23px;
+            }
+
+
+            td {
+
+                font-size:
+                    13px;
+
+                padding:
+                    10px 5px;
+            }
+
+
+            th {
+
+                font-size:
+                    11px;
+
+                padding:
+                    9px 5px;
+            }
+
+
+            .line-column {
+
+                font-size:
+                    16px;
+            }
+
+
+            #map {
+
+                height:
+                    300px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="header-row">
+
+        <div>
+
+            <div class="header-title">
+
+                KAUNIAINEN PUBLIC TRANSPORT
+
+            </div>
+
+            <div class="header-subtitle">
+
+                Real-time HSL departures
+
+            </div>
+
+        </div>
+
+
+        <div class="clock">
+
+            <div
+                id="clockTime"
+                class="clock-time"
+            >
+                --:--
+            </div>
+
+            <div
+                id="clockDate"
+                class="clock-date"
+            >
+                --
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<main class="container">
+
+
+<div class="dashboard">
+
+
+<aside class="points-panel">
+
+    <div class="panel-title">
+        Transport points
+    </div>
+
+    <div class="panel-info">
+        Select the points included in the combined departure board.
+    </div>
+
+    <div id="pointList">
+        Loading...
+    </div>
+
+    <div class="point-actions">
+
+        <button
+            id="selectAll"
+            type="button"
+        >
+            Select all
+        </button>
+
+        <button
+            id="clearAll"
+            type="button"
+        >
+            Clear
+        </button>
+
+    </div>
+
+</aside>
+
+
+
+<section>
+
+
+    <div class="section-title">
+
+        Next departures
+
+    </div>
+
+
+    <div class="departures">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th class="point-column">
+                        POINT
+                    </th>
+
+                    <th>
+                        LINE
+                    </th>
+
+                    <th>
+                        DESTINATION
+                    </th>
+
+                    <th>
+                        TIME
+                    </th>
+
+                    <th>
+                        IN
+                    </th>
+
+                    <th class="walk-column">
+                        🚶
+                    </th>
+
+                    <th class="status-column">
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="departureTable">
+
+                <tr>
+                    <td colspan="7">
+                        Loading...
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <div
+        id="error"
+        class="error"
+    ></div>
+
+
+
+    <div class="map-section">
+
+        <div class="section-title">
+
+            Transport map
+
+        </div>
+
+        <div id="map"></div>
+
+    </div>
+
+
+    <div class="status-bar">
+
+        <div>
+
+            <span
+                id="connectionStatus"
+                class="connection-status"
+            >
+
+                <span
+                    class="connection-dot"
+                ></span>
+
+                <span id="connectionText">
+                    CONNECTING
+                </span>
+
+            </span>
+
+            &nbsp;&nbsp;
+
+            <span id="updateLabel">
+                Updated:
+            </span>
+
+            <span id="updated">
+                --:--:--
+            </span>
+
+        </div>
+
+
+        <div>
+            Auto refresh: 30 s
+        </div>
+
+    </div>
+
+
+</section>
+
+
+</div>
+
+
+</main>
+
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
+
+
+<script>
+
+
+let HOME = null;
+let APP_CONFIG = null;
+
+
+async function loadAppConfig() {
+
+    const response =
+        await fetch(
+            "/api/config"
+        );
+
+    if (!response.ok) {
+
+        throw new Error(
+            `Unable to load configuration: HTTP ${response.status}`
+        );
+
+    }
+
+    APP_CONFIG =
+        await response.json();
+
+    HOME = {
+
+        name:
+            APP_CONFIG.reference.name,
+
+        lat:
+            APP_CONFIG.reference.lat,
+
+        lon:
+            APP_CONFIG.reference.lon
+
+    };
+
+}
+
+
+const MAX_DEPARTURES =
+    12;
+
+
+const STORAGE_KEY =
+    "kauniainen-selected-stops";
+
+
+const pointList =
+    document.getElementById(
+        "pointList"
+    );
+
+
+const departureTable =
+    document.getElementById(
+        "departureTable"
+    );
+
+
+const updated =
+    document.getElementById(
+        "updated"
+    );
+
+
+const updateLabel =
+    document.getElementById(
+        "updateLabel"
+    );
+
+
+const errorBox =
+    document.getElementById(
+        "error"
+    );
+
+
+const connectionStatus =
+    document.getElementById(
+        "connectionStatus"
+    );
+
+
+const connectionText =
+    document.getElementById(
+        "connectionText"
+    );
+
+
+let stops = [];
+
+let map = null;
+
+let stopMarkers = [];
+
+let lastSuccessfulUpdate =
+    null;
+
+
+
+function setConnectionStatus(
+    isLive
+) {
+
+
+    connectionStatus.classList.remove(
+        "live",
+        "offline"
+    );
+
+
+    if (isLive) {
+
+
+        connectionStatus.classList.add(
+            "live"
+        );
+
+
+        connectionText.textContent =
+            "LIVE";
+
+
+        updateLabel.textContent =
+            "Updated:";
+
+    }
+
+    else {
+
+
+        connectionStatus.classList.add(
+            "offline"
+        );
+
+
+        connectionText.textContent =
+            "OFFLINE";
+
+
+        if (lastSuccessfulUpdate) {
+
+            updateLabel.textContent =
+                "Last successful update:";
+
+        }
+
+    }
+
+}
+
+
+
+function saveSelectedStops() {
+
+
+    const selectedIds =
+        Array.from(
+
+            document.querySelectorAll(
+                ".stop-checkbox:checked"
+            )
+
+        ).map(
+
+            checkbox =>
+                checkbox.value
+
+        );
+
+
+    localStorage.setItem(
+
+        STORAGE_KEY,
+
+        JSON.stringify(
+            selectedIds
+        )
+
+    );
+
+}
+
+
+
+function getSavedStops() {
+
+
+    try {
+
+
+        const saved =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if (!saved) {
+
+            return null;
+
+        }
+
+
+        const parsed =
+            JSON.parse(
+                saved
+            );
+
+
+        if (
+            !Array.isArray(
+                parsed
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        return parsed;
+
+
+    }
+
+    catch (error) {
+
+
+        console.error(
+            "Unable to read saved stop selection:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
+
+
+
+function updateClock() {
+
+
+    const now =
+        new Date();
+
+
+    document.getElementById(
+        "clockTime"
+    ).textContent =
+
+        now.toLocaleTimeString(
+            "fi-FI",
+            {
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit"
+            }
+        );
+
+
+    document.getElementById(
+        "clockDate"
+    ).textContent =
+
+        now.toLocaleDateString(
+            "en-GB",
+            {
+                weekday:
+                    "long",
+
+                day:
+                    "numeric",
+
+                month:
+                    "short"
+            }
+        );
+
+}
+
+
+
+function initializeMap() {
+
+
+    map =
+        L.map(
+            "map"
+        ).setView(
+            [
+                HOME.lat,
+                HOME.lon
+            ],
+            16
+        );
+
+
+    L.tileLayer(
+
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+        {
+
+            maxZoom:
+                19,
+
+            attribution:
+                '&copy; OpenStreetMap contributors'
+
+        }
+
+    ).addTo(map);
+
+
+
+    const homeIcon =
+        L.divIcon({
+
+            className:
+                "",
+
+            html:
+                '<div class="home-marker">🏠</div>',
+
+            iconSize:
+                [32, 32],
+
+            iconAnchor:
+                [16, 16]
+
+        });
+
+
+
+    L.marker(
+
+        [
+            HOME.lat,
+            HOME.lon
+        ],
+
+        {
+            icon:
+                homeIcon
+        }
+
+    )
+    .addTo(map)
+    .bindPopup(
+        `<b>${HOME.name}</b>`
+    );
+
+}
+
+
+
+function clearStopMarkers() {
+
+
+    for (
+        const marker
+        of stopMarkers
+    ) {
+
+        map.removeLayer(
+            marker
+        );
+
+    }
+
+
+    stopMarkers = [];
+
+}
+
+
+
+function addStopMarker(
+    stop,
+    lat,
+    lon
+) {
+
+
+    const icon =
+        L.divIcon({
+
+            className:
+                "",
+
+            html: `
+
+                <div class="number-marker">
+
+                    ${stop.index}
+
+                </div>
+
+            `,
+
+            iconSize:
+                [30, 30],
+
+            iconAnchor:
+                [15, 15]
+
+        });
+
+
+
+    const marker =
+        L.marker(
+
+            [lat, lon],
+
+            {
+                icon:
+                    icon
+            }
+
+        )
+        .addTo(map);
+
+
+
+    marker.bindPopup(
+
+        `<b>Point ${stop.index}</b><br>
+         ${stop.label}`
+
+    );
+
+
+    stopMarkers.push(
+        marker
+    );
+
+}
+
+
+
+function getSelectedStops() {
+
+
+    const result = [];
+
+
+    document
+        .querySelectorAll(
+            ".stop-checkbox:checked"
+        )
+        .forEach(
+
+            checkbox => {
+
+                const stop =
+                    stops.find(
+
+                        item =>
+                            item.id === checkbox.value
+
+                    );
+
+
+                if (stop) {
+
+                    result.push(
+                        stop
+                    );
+
+                }
+
+            }
+
+        );
+
+
+    return result;
+
+}
+
+
+
+async function loadStops() {
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/stops"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTP ${response.status}`
+            );
+
+        }
+
+
+        stops =
+            await response.json();
+
+
+        pointList.innerHTML =
+            "";
+
+
+        const savedStops =
+            getSavedStops();
+
+
+        for (
+            const stop
+            of stops
+        ) {
+
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+
+            wrapper.className =
+                "point-item";
+
+
+            let checked =
+                true;
+
+
+            if (
+                savedStops !== null
+            ) {
+
+                checked =
+                    savedStops.includes(
+                        stop.id
+                    );
+
+            }
+
+
+            wrapper.innerHTML = `
+
+                <input
+                    class="stop-checkbox"
+                    type="checkbox"
+                    value="${stop.id}"
+                    id="stop-${stop.index}"
+                    ${checked ? "checked" : ""}
+                >
+
+
+                <label
+                    class="point-label"
+                    for="stop-${stop.index}"
+                >
+
+                    <span class="point-number">
+
+                        [${stop.index}]
+
+                    </span>
+
+                    ${stop.label}
+
+
+                    <span
+                        id="walk-${stop.index}"
+                        class="walking-info"
+                    >
+
+                        🚶 calculating...
+
+                    </span>
+
+                </label>
+
+            `;
+
+
+            pointList.appendChild(
+                wrapper
+            );
+
+
+            wrapper
+                .querySelector(
+                    "input"
+                )
+                .addEventListener(
+
+                    "change",
+
+                    () => {
+
+                        saveSelectedStops();
+
+                        loadCombinedDepartures();
+
+                    }
+
+                );
+
+        }
+
+
+        await loadCombinedDepartures();
+
+
+    }
+
+    catch (error) {
+
+
+        pointList.textContent =
+            "Unable to load transport points.";
+
+
+        setConnectionStatus(
+            false
+        );
+
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+
+async function getStopDepartures(
+    stop
+) {
+
+
+    const response =
+        await fetch(
+
+            `/api/departures?stop_id=${encodeURIComponent(stop.id)}`
+
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            `HTTP ${response.status}`
+        );
+
+    }
+
+
+    const data =
+        await response.json();
+
+
+    return {
+        stop,
+        data
+    };
+
+}
+
+
+
+async function loadCombinedDepartures() {
+
+
+    const selectedStops =
+        getSelectedStops();
+
+
+    errorBox.textContent =
+        "";
+
+
+    if (
+        selectedStops.length === 0
+    ) {
+
+
+        clearStopMarkers();
+
+
+        departureTable.innerHTML = `
+
+            <tr>
+
+                <td colspan="7">
+
+                    Select at least one transport point.
+
+                </td>
+
+            </tr>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const results =
+            await Promise.all(
+
+                selectedStops.map(
+                    getStopDepartures
+                )
+
+            );
+
+
+        let combined =
+            [];
+
+
+        const mapPositions = [
+
+            [
+                HOME.lat,
+                HOME.lon
+            ]
+
+        ];
+
+
+        clearStopMarkers();
+
+
+        for (
+            const result
+            of results
+        ) {
+
+
+            const stop =
+                result.stop;
+
+
+            const data =
+                result.data;
+
+
+            const walkingElement =
+                document.getElementById(
+
+                    `walk-${stop.index}`
+
+                );
+
+
+            if (
+                walkingElement &&
+                data.walking.minutes_display !== null
+            ) {
+
+
+                walkingElement.textContent =
+
+                    `🚶 ${data.walking.minutes_display} min · ${data.walking.distance} m`;
+
+            }
+
+
+            if (
+                data.stop.lat !== null &&
+                data.stop.lon !== null
+            ) {
+
+
+                addStopMarker(
+
+                    stop,
+
+                    data.stop.lat,
+
+                    data.stop.lon
+
+                );
+
+
+                mapPositions.push(
+                    [
+                        data.stop.lat,
+                        data.stop.lon
+                    ]
+                );
+
+            }
+
+
+
+            for (
+                const departure
+                of data.departures
+            ) {
+
+
+                combined.push({
+
+                    ...departure,
+
+                    pointIndex:
+                        stop.index,
+
+                    walking:
+                        data.walking
+
+                });
+
+            }
+
+
+            lastSuccessfulUpdate =
+                data.updated;
+
+
+            updated.textContent =
+                data.updated;
+
+        }
+
+
+
+        combined.sort(
+
+            (a, b) => {
+
+                if (
+                    a.minutes !== b.minutes
+                ) {
+
+                    return (
+                        a.minutes -
+                        b.minutes
+                    );
+
+                }
+
+
+                return (
+                    a.time.localeCompare(
+                        b.time
+                    )
+                );
+
+            }
+
+        );
+
+
+
+        combined =
+            combined.slice(
+                0,
+                MAX_DEPARTURES
+            );
+
+
+
+        departureTable.innerHTML =
+            "";
+
+
+
+        for (
+            const departure
+            of combined
+        ) {
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const timeText =
+
+                departure.source ===
+                "SCHED"
+
+                    ? `~${departure.time}`
+
+                    : departure.time;
+
+
+            const inText =
+
+                departure.minutes <= 0
+
+                    ? "NOW"
+
+                    : `${departure.minutes} min`;
+
+
+            const walkText =
+
+                departure.walking.minutes_display !== null
+
+                    ? `${departure.walking.minutes_display} min`
+
+                    : "-";
+
+
+            row.innerHTML = `
+
+                <td class="point-column">
+
+                    <span class="point-badge">
+
+                        ${departure.pointIndex}
+
+                    </span>
+
+                </td>
+
+
+                <td class="line-column">
+
+                    ${departure.line}
+
+                </td>
+
+
+                <td>
+
+                    ${departure.destination}
+
+                </td>
+
+
+                <td class="time-column">
+
+                    ${timeText}
+
+                </td>
+
+
+                <td class="minutes-column">
+
+                    ${inText}
+
+                </td>
+
+
+                <td class="walk-column">
+
+                    ${walkText}
+
+                </td>
+
+
+                <td class="status-column">
+
+                    ${departure.status.emoji}
+
+                </td>
+
+            `;
+
+
+            departureTable.appendChild(
+                row
+            );
+
+        }
+
+
+
+        if (
+            mapPositions.length > 1
+        ) {
+
+
+            map.fitBounds(
+
+                L.latLngBounds(
+                    mapPositions
+                ),
+
+                {
+                    padding:
+                        [45, 45],
+
+                    maxZoom:
+                        17
+                }
+
+            );
+
+        }
+
+
+        setConnectionStatus(
+            true
+        );
+
+
+    }
+
+    catch (error) {
+
+
+        /*
+         * IMPORTANT:
+         * We intentionally do NOT clear
+         * the existing departure table here.
+         *
+         * If the API fails temporarily,
+         * the last valid data remains visible.
+         */
+
+
+        setConnectionStatus(
+            false
+        );
+
+
+        errorBox.textContent =
+
+            "Connection unavailable. Showing last successful data.";
+
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+
+document
+    .getElementById(
+        "selectAll"
+    )
+    .addEventListener(
+
+        "click",
+
+        () => {
+
+
+            document
+                .querySelectorAll(
+                    ".stop-checkbox"
+                )
+                .forEach(
+
+                    checkbox => {
+
+                        checkbox.checked =
+                            true;
+
+                    }
+
+                );
+
+
+            saveSelectedStops();
+
+            loadCombinedDepartures();
+
+        }
+
+    );
+
+
+
+document
+    .getElementById(
+        "clearAll"
+    )
+    .addEventListener(
+
+        "click",
+
+        () => {
+
+
+            document
+                .querySelectorAll(
+                    ".stop-checkbox"
+                )
+                .forEach(
+
+                    checkbox => {
+
+                        checkbox.checked =
+                            false;
+
+                    }
+
+                );
+
+
+            saveSelectedStops();
+
+            loadCombinedDepartures();
+
+        }
+
+    );
+
+
+
+setInterval(
+
+    loadCombinedDepartures,
+
+    30000
+
+);
+
+
+
+setInterval(
+
+    updateClock,
+
+    1000
+
+);
+
+
+
+async function startApplication() {
+
+    try {
+
+        await loadAppConfig();
+
+        initializeMap();
+
+        updateClock();
+
+        await loadStops();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Application initialization failed:",
+            error
+        );
+
+        setConnectionStatus(
+            false
+        );
+
+    }
+
+}
+
+
+startApplication();
+
+
+</script>
+
+
+</body>
+
+</html>
